@@ -12,7 +12,7 @@ public class ImUser implements Serializable {
     private String password;
     private String avatar;
     private String signature;
-    private Date createTime;
+    private Long createTime;
     private Integer sex;
     private String email;
 

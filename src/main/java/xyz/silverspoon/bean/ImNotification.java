@@ -11,5 +11,5 @@ public class ImNotification {
     private int type;
     private String content;
     private int status;
-    private Date time;
+    private Long time;
 }

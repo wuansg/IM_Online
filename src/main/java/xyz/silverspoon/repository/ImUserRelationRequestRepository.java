@@ -33,4 +33,8 @@ public class ImUserRelationRequestRepository {
     public UpdateResult updateRequest(Query query, Update update) {
         return template.updateFirst(query, update, ImUserRelationRequest.class, COLLECTION_NAME);
     }
+
+    public long count(Query query) {
+        return template.count(query, ImUserRelationRequest.class, COLLECTION_NAME);
+    }
 }

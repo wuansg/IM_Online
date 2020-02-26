@@ -27,11 +27,19 @@ public class ImUserRelationRepository {
         return template.find(query, ImUserRelation.class, COLLECTION_NAME);
     }
 
+    public long count(Query query) {
+        return template.count(query, ImUserRelation.class, COLLECTION_NAME);
+    }
+
     public UpdateResult delete(Query query) {
         return template.updateFirst(query, Update.update("status", 0), ImUserRelation.class, COLLECTION_NAME);
     }
 
     public DeleteResult remove(Query query) {
         return template.remove(query, ImUserRelation.class, COLLECTION_NAME);
+    }
+
+    public ImUserRelation findOne(Query query) {
+        return template.findOne(query, ImUserRelation.class, COLLECTION_NAME);
     }
 }

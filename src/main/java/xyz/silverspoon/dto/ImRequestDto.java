@@ -10,5 +10,6 @@ import java.util.Date;
 public class ImRequestDto {
     private String UUID;
     private ImUser requestUser;
-    private Date createTime;
+    private Integer status;
+    private Long createTime;
 }

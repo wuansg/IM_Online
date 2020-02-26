@@ -1,5 +1,6 @@
 package xyz.silverspoon.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import xyz.silverspoon.bean.ImUser;
@@ -17,5 +18,7 @@ public interface ImUserService {
 
     ImUser addUser(ImUser user);
 
-    List<ImUser> getUsers(Query query);
+    Page<ImUser> getUsersLike(String username, int pageNum, int pageSize);
+
+    void updateAvatar(String uuid, String avatar);
 }

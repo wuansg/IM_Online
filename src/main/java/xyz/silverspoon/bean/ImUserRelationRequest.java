@@ -10,6 +10,6 @@ public class ImUserRelationRequest {
     private String requestID;
     private String acceptID;
     private Integer status;
-    private Date createTime;
-    private Date modifyTime;
+    private Long createTime;
+    private Long modifyTime;
 }

@@ -1,9 +1,12 @@
 package xyz.silverspoon.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.web.bind.annotation.*;
 import xyz.silverspoon.bean.ImUser;
 import xyz.silverspoon.bean.ImUserRelation;
@@ -34,10 +37,12 @@ public class ImUserRelationController {
     private ImUserRelationRequestService requestService;
 
     @RequestMapping(value = "/{userUUID}", method = RequestMethod.GET)
-    public ImCommonResult<List<ImUser>> getFriends(@PathVariable String userUUID) {
+    public ImCommonResult<Page<ImUser>> getFriends(@PathVariable String userUUID,
+                                                   @RequestParam int pageSize,
+                                                   @RequestParam int pageNum) {
         ImUser user = new ImUser();
         user.setUUID(userUUID);
-        List<ImUserRelation> relations = relationService.listRelations(user);
+        Page<ImUserRelation> relations = relationService.listRelationsPage(userUUID, pageSize, pageNum);
         List<ImUser> friends = new LinkedList<>();
         relations.forEach(relation -> {
             ImUser user1;
@@ -49,7 +54,9 @@ public class ImUserRelationController {
             user1.setPassword("");
             friends.add(user1);
         });
-        return ImCommonResult.success(friends);
+        long count = relations.getTotalElements();
+        Page<ImUser> users = PageableExecutionUtils.getPage(friends, PageRequest.of(pageNum, pageSize), () -> count);
+        return ImCommonResult.success(users);
     }
 
 }

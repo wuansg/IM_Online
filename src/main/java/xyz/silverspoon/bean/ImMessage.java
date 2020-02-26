@@ -12,5 +12,5 @@ public class ImMessage {
     private Integer type;
     private String content;
     private Integer status;
-    private Date time;
+    private Long time;
 }

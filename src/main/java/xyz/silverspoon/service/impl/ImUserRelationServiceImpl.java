@@ -2,9 +2,14 @@ package xyz.silverspoon.service.impl;
 
 import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
+import xyz.silverspoon.Constants;
 import xyz.silverspoon.bean.ImUser;
 import xyz.silverspoon.bean.ImUserRelation;
 import xyz.silverspoon.repository.ImUserRelationRepository;
@@ -26,8 +31,19 @@ public class ImUserRelationServiceImpl implements ImUserRelationService {
     @Override
     public List<ImUserRelation> listRelations(ImUser user) {
         Criteria criteria = new Criteria();
-        criteria.orOperator(Criteria.where("user1").is(user.getUUID()), Criteria.where("user2").is(user.getUUID()));
+        criteria.orOperator(Criteria.where(Constants.RELATION_USER1).is(user.getUUID()), Criteria.where(Constants.RELATION_USER2).is(user.getUUID()));
         return relationRepository.listRelations(new Query(criteria));
+    }
+
+    @Override
+    public Page<ImUserRelation> listRelationsPage(String uuid, int pageSize, int pageNum) {
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Criteria criteria = new Criteria();
+        criteria.orOperator(Criteria.where(Constants.RELATION_USER1).is(uuid), Criteria.where(Constants.RELATION_USER2).is(uuid));
+        Query query = new Query(criteria).with(pageable);
+        List<ImUserRelation> relations = relationRepository.listRelations(query);
+        long count = relationRepository.count(query);
+        return PageableExecutionUtils.getPage(relations, pageable, () -> count);
     }
 
     @Override
@@ -38,8 +54,15 @@ public class ImUserRelationServiceImpl implements ImUserRelationService {
 
     @Override
     public boolean deleteRelation(ImUserRelation relation) {
-        Query query = new Query(Criteria.where("UUID").is(relation.getUUID()));
+        Query query = new Query(Criteria.where(Constants.IM_UUID).is(relation.getUUID()));
         DeleteResult result = relationRepository.remove(query);
         return result.getDeletedCount() == 1L;
+    }
+
+    @Override
+    public ImUserRelation getRelationByUserID(String requestID, String acceptID) {
+        Query query = new Query(Criteria.where(Constants.RELATION_USER1).in(requestID, acceptID).
+                and(Constants.RELATION_USER2).in(requestID, acceptID));
+        return relationRepository.findOne(query);
     }
 }
