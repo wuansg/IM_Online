@@ -1,5 +1,7 @@
 package xyz.silverspoon.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.repository.support.PageableExecutionUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import xyz.silverspoon.bean.ImUser;
 import xyz.silverspoon.bean.ImUserRelation;
@@ -26,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/friends")
 public class ImUserRelationController {
+    private static Logger logger = LoggerFactory.getLogger(ImUserRelationController.class);
 
     @Autowired
     private UUIDGenerator uuidGenerator;
@@ -37,12 +41,12 @@ public class ImUserRelationController {
     private ImUserRelationRequestService requestService;
 
     @RequestMapping(value = "/{userUUID}", method = RequestMethod.GET)
-    public ImCommonResult<Page<ImUser>> getFriends(@PathVariable String userUUID,
-                                                   @RequestParam int pageSize,
-                                                   @RequestParam int pageNum) {
+    public ImCommonResult<List<ImUser>> getFriends(@PathVariable String userUUID,
+                                                   @RequestParam(required = false) int pageSize,
+                                                   @RequestParam(required = false) int pageNum) {
         ImUser user = new ImUser();
         user.setUUID(userUUID);
-        Page<ImUserRelation> relations = relationService.listRelationsPage(userUUID, pageSize, pageNum);
+        List<ImUserRelation> relations = relationService.listRelationsPage(userUUID, pageSize, pageNum);
         List<ImUser> friends = new LinkedList<>();
         relations.forEach(relation -> {
             ImUser user1;
@@ -54,9 +58,7 @@ public class ImUserRelationController {
             user1.setPassword("");
             friends.add(user1);
         });
-        long count = relations.getTotalElements();
-        Page<ImUser> users = PageableExecutionUtils.getPage(friends, PageRequest.of(pageNum, pageSize), () -> count);
-        return ImCommonResult.success(users);
+        return ImCommonResult.success(friends);
     }
 
 }

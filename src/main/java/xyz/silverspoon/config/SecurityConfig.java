@@ -65,7 +65,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
-                        .allowedOrigins("http://www.silverspoon.xyz")
                         .allowedOrigins("http://localhost")
                         .allowedOrigins("http://localhost:8081")
                         .allowCredentials(true)

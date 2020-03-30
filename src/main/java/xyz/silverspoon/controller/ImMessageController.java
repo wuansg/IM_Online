@@ -3,7 +3,11 @@ package xyz.silverspoon.controller;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +21,8 @@ import xyz.silverspoon.service.ImMessageService;
 import xyz.silverspoon.service.ImUserService;
 import xyz.silverspoon.utils.UUIDType;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -100,5 +106,28 @@ public class ImMessageController {
             return ImCommonResult.error(501, Constants.FILE_EXCEPTION);
         }
         return ImCommonResult.success(filename);
+    }
+
+    @GetMapping(value = "/download/files/{filename}")
+    public ResponseEntity<Resource> downloadFiles(@PathVariable String filename,
+                                                  @RequestParam String filepath,
+                                                  HttpServletRequest request) {
+        Resource resource = messageService.downloadFile(filepath);
+
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(resource);
     }
 }

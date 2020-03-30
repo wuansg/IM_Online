@@ -36,14 +36,12 @@ public class ImUserRelationServiceImpl implements ImUserRelationService {
     }
 
     @Override
-    public Page<ImUserRelation> listRelationsPage(String uuid, int pageSize, int pageNum) {
+    public List<ImUserRelation> listRelationsPage(String uuid, int pageSize, int pageNum) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
         Criteria criteria = new Criteria();
         criteria.orOperator(Criteria.where(Constants.RELATION_USER1).is(uuid), Criteria.where(Constants.RELATION_USER2).is(uuid));
         Query query = new Query(criteria).with(pageable);
-        List<ImUserRelation> relations = relationRepository.listRelations(query);
-        long count = relationRepository.count(query);
-        return PageableExecutionUtils.getPage(relations, pageable, () -> count);
+        return relationRepository.listRelations(query);
     }
 
     @Override

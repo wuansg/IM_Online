@@ -10,12 +10,14 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import xyz.silverspoon.Constants;
 import xyz.silverspoon.bean.ImUser;
 import xyz.silverspoon.component.ImCommonResult;
 import xyz.silverspoon.component.ImUserDetails;
 import xyz.silverspoon.repository.ImUserRepository;
 import xyz.silverspoon.service.ImUserService;
+import xyz.silverspoon.utils.FileStorageUtils;
 import xyz.silverspoon.utils.UUIDGenerator;
 import xyz.silverspoon.utils.UUIDType;
 
@@ -27,6 +29,9 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Autowired
     private UUIDGenerator uuidGenerator;
+
+    @Autowired
+    private FileStorageUtils fileStorageUtils;
 
     @Autowired
     public ImUserServiceImpl(ImUserRepository userRepository) {
@@ -75,9 +80,16 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public void updateAvatar(String uuid, String avatar) {
+    public String updateAvatar(String uuid, MultipartFile file, UUIDType type) {
+        String filepath = fileStorageUtils.saveFile(file, type);
         Query query = new Query(Criteria.where(Constants.IM_UUID).is(uuid));
-        Update update = new Update().set(Constants.USER_AVATAR, avatar);
+        Update update = new Update().set(Constants.USER_AVATAR, filepath);
         userRepository.update(query, update);
+        return filepath;
+    }
+
+    @Override
+    public void update(ImUser user) {
+        userRepository.save(user);
     }
 }

@@ -6,9 +6,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import xyz.silverspoon.Constants;
 import xyz.silverspoon.bean.ImUser;
 import xyz.silverspoon.component.ImCommonResult;
 import xyz.silverspoon.service.ImUserService;
+import xyz.silverspoon.utils.UUIDType;
 
 import java.util.List;
 
@@ -27,9 +30,24 @@ public class ImUserController {
         return ImCommonResult.success(users);
     }
 
+//    @RequestMapping(value = "/update/avatar/{uuid}", method = RequestMethod.POST)
+//    public ImCommonResult<String> updateAvatar(@PathVariable String uuid, @RequestBody String avatar) {
+//        userService.updateAvatar(uuid, avatar);
+//        return ImCommonResult.success("更新成功.");
+//    }
+
     @RequestMapping(value = "/update/avatar/{uuid}", method = RequestMethod.POST)
-    public ImCommonResult<String> updateAvatar(@PathVariable String uuid, @RequestBody String avatar) {
-        userService.updateAvatar(uuid, avatar);
+    public ImCommonResult<String> updateAvatar(@PathVariable String uuid, MultipartFile file) {
+        String filepath = userService.updateAvatar(uuid, file, UUIDType.IM_PIC);
+        if ("".equals(filepath)) {
+            return ImCommonResult.error(Constants.CODE_IO, Constants.FILE_EXCEPTION);
+        }
+        return ImCommonResult.success(filepath);
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    public ImCommonResult<String> update(@RequestBody ImUser user) {
+        userService.update(user);
         return ImCommonResult.success("更新成功.");
     }
 }

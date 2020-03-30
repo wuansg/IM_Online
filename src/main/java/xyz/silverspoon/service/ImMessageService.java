@@ -1,5 +1,6 @@
 package xyz.silverspoon.service;
 
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.silverspoon.bean.ImMessage;
@@ -21,4 +22,6 @@ public interface ImMessageService {
     String uploadFile(MultipartFile file, UUIDType type);
 
     void updateStates(String receiverID, String senderID);
+
+    Resource downloadFile(String filepath);
 }

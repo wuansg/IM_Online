@@ -63,7 +63,7 @@ public class ImUserRelationRequestServiceImpl implements ImUserRelationRequestSe
 
     @Override
     public ImUserRelationRequest getRequestByUserID(String requestID, String receiveID) {
-        Query query = Query.query(Criteria.where(Constants.IM_REQUESTID).is(requestID).and(Constants.IM_RECEIVERID).is(receiveID));
+        Query query = Query.query(Criteria.where(Constants.IM_REQUESTID).in(requestID, receiveID).and(Constants.IM_RECEIVERID).in(receiveID, requestID));
         return repository.getRequest(query);
     }
 

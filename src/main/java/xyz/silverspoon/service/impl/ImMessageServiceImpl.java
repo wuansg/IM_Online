@@ -3,6 +3,7 @@ package xyz.silverspoon.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,6 +23,7 @@ import xyz.silverspoon.param.UserMessageParam;
 import xyz.silverspoon.repository.ImMessageRepository;
 import xyz.silverspoon.repository.ImUserRepository;
 import xyz.silverspoon.service.ImMessageService;
+import xyz.silverspoon.utils.FileStorageUtils;
 import xyz.silverspoon.utils.UUIDGenerator;
 import xyz.silverspoon.utils.UUIDType;
 
@@ -37,8 +39,9 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private UUIDGenerator uuidGenerator;
 
-    @Value(value = "${im.redis.unreads.key.prefix:}")
-    private String UNREADS_PREFIX;
+    @Autowired
+    private FileStorageUtils fileStorageUtils;
+
     @Value(value = "${file.upload.path}")
     private String FILEUPLOADPATH;
 
@@ -48,8 +51,8 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private ImUserRepository userRepository;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String, Object> redisTemplate;
 
     public ImMessageServiceImpl() {
     }
@@ -73,8 +76,6 @@ public class ImMessageServiceImpl implements ImMessageService {
     public ImMessage saveMessage(ImMessage message) {
         message.setUUID(uuidGenerator.generateUUID(UUIDType.IM_MESSAGE));
         message = messageRepository.save(message);
-//        redisTemplate.expire(UNREADS_PREFIX+message.getReceiverID(), 30, TimeUnit.MINUTES);
-        redisTemplate.opsForList().rightPush(UNREADS_PREFIX+message.getReceiverID(), message);
         return message;
     }
 
@@ -106,27 +107,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     public String uploadFile(MultipartFile file, UUIDType type) {
-        log.info(file.getContentType());
-        String pathPrefix;
-        switch (type) {
-            case IM_FILE:
-                pathPrefix = "/files/";
-                break;
-            case IM_PIC:
-                pathPrefix = "/imgs/";
-                break;
-            default:
-                pathPrefix = "";
-        }
-        String filename = pathPrefix + uuidGenerator.generateUUID(type);
-        File temp = new File(FILEUPLOADPATH + filename);
-        try {
-            file.transferTo(temp);
-            return filename;
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            return "";
-        }
+        return fileStorageUtils.saveFile(file, type);
     }
 
     @Override
@@ -135,5 +116,10 @@ public class ImMessageServiceImpl implements ImMessageService {
                 .and(Constants.MESSAGE_SENDERID).is(senderID));
         Update update = new Update().set("status", 1);
         messageRepository.update(query, update);
+    }
+
+    @Override
+    public Resource downloadFile(String filepath) {
+        return fileStorageUtils.loadFileAsResource(filepath);
     }
 }

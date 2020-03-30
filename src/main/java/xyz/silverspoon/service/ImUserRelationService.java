@@ -9,7 +9,7 @@ import java.util.List;
 public interface ImUserRelationService {
     List<ImUserRelation> listRelations(ImUser user);
 
-    Page<ImUserRelation> listRelationsPage(String uuid, int pageSize, int pageNum);
+    List<ImUserRelation> listRelationsPage(String uuid, int pageSize, int pageNum);
 
     ImUserRelation addRelation(ImUserRelation relation);
 

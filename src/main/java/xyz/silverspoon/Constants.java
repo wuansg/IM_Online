@@ -12,6 +12,7 @@ public class Constants {
     public static final String IM_RECEIVERID = "receiverID";
     public static final int CODE_NOT_FOUND = 404;
     public static final int CODE_EXIST = 501;
+    public static final int CODE_IO = 555;
 
     // service 关于数据库的表字段
     // All collections's uuid
@@ -46,4 +47,5 @@ public class Constants {
     public static final String JPG = ".jpg";
     public static final String PNG = ".png";
     public static final String JPEG = ".jpeg";
+
 }
